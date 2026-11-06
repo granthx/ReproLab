@@ -1,0 +1,23 @@
+{
+  "experiment_type": "synthetic_binary_classification_v1",
+  "fixture_version": "1.0.0",
+  "dataset_file": "dataset.csv",
+  "split_file": "split.csv",
+  "dataset_sha256": "d249ff7fee8e2428fd6082a4ec192d7e9a52da578859143394992579bafde244",
+  "split_sha256": "fd6559f81b757c5ad19b6c8c9be3ab970f5a4c0f94bda1bbea58f61fdf65969b",
+  "row_id_column": "row_id",
+  "feature_columns": ["feature_a", "feature_b"],
+  "target_column": "target",
+  "train_label": "train",
+  "test_label": "test",
+  "model": {
+    "name": "deterministic_linear_threshold",
+    "threshold": 0.5,
+    "positive_if_sum_gte_threshold": true
+  },
+  "seed": 7,
+  "prediction_schema": {
+    "required_columns": ["row_id", "y_true", "y_pred", "score"],
+    "target_values": [0, 1]
+  }
+}
