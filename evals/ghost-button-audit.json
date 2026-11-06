@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-11-05T13:04:32.496Z",
+  "scenariosExecuted": 29,
+  "totalControlsInspected": 430,
+  "functionalControls": 423,
+  "disabledControls": 7,
+  "disabledReasons": {
+    "Enter a case title to enable creation": 5,
+    "Select a PDF file to archive": 2
+  },
+  "ghostControls": 0,
+  "failures": []
+}
