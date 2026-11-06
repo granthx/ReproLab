@@ -150,51 +150,6 @@ ReproLab/
 ├── pytest.ini                # Pytest configuration
 └── README.md                 # Single consolidated master documentation
 ```
-
----
-
-## 6. Setup & Getting Started
-
-### Prerequisites
-- Python 3.13+
-- Node.js 20+ & npm
-- PostgreSQL 16+ (or Docker)
-
-### Installation
-```powershell
-# 1. Backend environment
-cd backend
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-
-# 2. Frontend environment
-cd ..\frontend
-npm install
-```
-
-### Running Locally
-```powershell
-# Start PostgreSQL (or docker run postgres)
-# Set environment variables in .env
-# Start FastAPI backend
-backend\.venv\Scripts\python.exe -m uvicorn reprolab.main:app --port 8000 --app-dir backend --reload
-
-# Start Next.js frontend
-npm --prefix frontend run dev
-```
-
-Visit the workbench at `http://localhost:3000` and API docs at `http://localhost:8000/docs`.
-
-### Running Tests & Verification Suites
-```powershell
-# Run complete unified test suite (55/55 tests)
-backend\.venv\Scripts\python.exe -m pytest backend/tests/ -v
-
-# Run live PostgreSQL integration suite
-backend\.venv\Scripts\python.exe -m pytest backend/tests/test_stage7_postgres.py backend/tests/test_stage8_postgres.py --postgres -v
-
-# Run frontend control audit (verifies 0 ghost controls across 430 controls)
 npm --prefix frontend run audit:controls
 
 # Execute production rollback drill (< 90s SLA)
