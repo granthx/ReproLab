@@ -1,0 +1,93 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "title": "ReproLab 01 - SRE & System Health",
+  "tags": ["reprolab", "sre", "reliability"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "API Availability (30-day rolling SLO: >= 99.5%)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "(1 - (sum(rate(reprolab_http_requests_total{status=~\"5..\"}[30d])) / sum(rate(reprolab_http_requests_total[30d])))) * 100",
+          "legendFormat": "Availability %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 99.0, "color": "yellow" },
+              { "value": 99.5, "color": "green" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "HTTP Request Throughput (RPS by Status Code)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 18, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (status) (rate(reprolab_http_requests_total[1m]))",
+          "legendFormat": "HTTP {{status}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Active Sandbox Containers in Execution",
+      "type": "gauge",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 6 },
+      "targets": [
+        {
+          "expr": "reprolab_sandbox_active_containers",
+          "legendFormat": "Containers"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "max": 50,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "green" },
+              { "value": 20, "color": "yellow" },
+              { "value": 40, "color": "red" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Workbench API P95 / P99 Latency (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 18, "x": 6, "y": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(reprolab_http_request_duration_seconds_bucket[5m]))) * 1000",
+          "legendFormat": "P95 Latency"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(reprolab_http_request_duration_seconds_bucket[5m]))) * 1000",
+          "legendFormat": "P99 Latency"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "title": "ReproLab 03 - Scientific Quality & Evaluation",
+  "tags": ["reprolab", "science", "quality", "eval"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Claim Extraction Running Precision (Target: >= 90.0%)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "reprolab_eval_extraction_precision * 100",
+          "legendFormat": "Precision %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 85, "color": "yellow" },
+              { "value": 90, "color": "green" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Persona Divergence Score (Shannon Entropy H, Target: >= 2.2)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "reprolab_eval_persona_entropy",
+          "legendFormat": "Entropy (bits)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 1.5, "color": "yellow" },
+              { "value": 2.2, "color": "green" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Reproduction Verdict Breakdown",
+      "type": "piechart",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (verdict) (reprolab_cases_completed_total)",
+          "legendFormat": "{{verdict}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Wilson 95% Confidence Interval Width Spread",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 6 },
+      "targets": [
+        {
+          "expr": "reprolab_eval_wilson_ci_width",
+          "legendFormat": "CI Width"
+        }
+      ]
+    }
+  ]
+}

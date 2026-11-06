@@ -1,0 +1,78 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "title": "ReproLab 04 - FinOps & Cost Attribution",
+  "tags": ["reprolab", "finops", "cost"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Total Inference Spend (USD Cumulative)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(reprolab_cost_spend_usd_total)",
+          "legendFormat": "Total USD"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "currencyUSD" } }
+    },
+    {
+      "id": 2,
+      "title": "Average Cost per Reproduction Case (Target: <= $0.15)",
+      "type": "gauge",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(reprolab_cost_spend_usd_total) / clamp_min(sum(reprolab_cases_completed_total), 1)",
+          "legendFormat": "Avg $/Case"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "max": 0.50,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "green" },
+              { "value": 0.15, "color": "yellow" },
+              { "value": 0.30, "color": "red" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Token Spend by Model Tier",
+      "type": "piechart",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (model) (reprolab_cost_spend_usd_total)",
+          "legendFormat": "{{model}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Hourly Burn Rate (USD/Hour)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 6 },
+      "targets": [
+        {
+          "expr": "sum(rate(reprolab_cost_spend_usd_total[1h])) * 3600",
+          "legendFormat": "USD/Hour"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "currencyUSD" } }
+    }
+  ]
+}

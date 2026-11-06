@@ -1,0 +1,68 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "title": "ReproLab 02 - LLM Performance & Latency",
+  "tags": ["reprolab", "llm", "performance"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Token Generation Rate (Tokens/Sec by Model)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (model) (rate(gen_ai_client_tokens_total{token_type=\"output\"}[1m]))",
+          "legendFormat": "{{model}} (output tps)"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Context Caching Efficiency (%)",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "(sum(rate(gen_ai_client_tokens_total{token_type=\"cached\"}[5m])) / sum(rate(gen_ai_client_tokens_total{token_type=~\"input|cached\"}[5m]))) * 100",
+          "legendFormat": "Cache Hit %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 50, "color": "yellow" },
+              { "value": 75, "color": "green" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Time to First Token (TTFT P95 / P99)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(gen_ai_client_time_to_first_token_seconds_bucket[5m]))) * 1000",
+          "legendFormat": "P95 TTFT (Target: <= 2000ms)"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(gen_ai_client_time_to_first_token_seconds_bucket[5m]))) * 1000",
+          "legendFormat": "P99 TTFT"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    }
+  ]
+}

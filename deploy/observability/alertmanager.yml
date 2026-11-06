@@ -1,0 +1,40 @@
+# Alertmanager Configuration for ReproLab Production
+# Routing P1 Critical alerts to PagerDuty/Slack, P2 to Webhook
+
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ["alertname", "cluster", "service"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: "laboratory-sre-webhook"
+  routes:
+    - match:
+        severity: critical
+      receiver: "pi-and-sre-pager"
+      repeat_interval: 1h
+    - match:
+        severity: warning
+      receiver: "laboratory-sre-webhook"
+
+inhibit_rules:
+  # Inhibit slow burn if fast burn is already active for the same SLO
+  - source_match:
+      alertname: "ReproLabSLOFastBurn"
+    target_match:
+      alertname: "ReproLabSLOSlowBurn"
+    equal: ["service"]
+
+receivers:
+  - name: "pi-and-sre-pager"
+    webhook_configs:
+      - url: "http://alert-gateway.local/api/v1/pagerduty/reprolab-critical"
+        send_resolved: true
+
+  - name: "laboratory-sre-webhook"
+    webhook_configs:
+      - url: "http://alert-gateway.local/api/v1/slack/reprolab-warnings"
+        send_resolved: true
+

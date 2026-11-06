@@ -1,0 +1,73 @@
+# Prometheus Alerting Rules for ReproLab Production
+# Multi-Window Multi-Burn-Rate Alerts (Google SRE Standard)
+
+groups:
+  - name: reprolab_slo_alerts
+    rules:
+      # P1 Fast Burn: 2% of 30-day budget consumed in 1 hour (14.4x burn rate)
+      - alert: ReproLabSLOFastBurn
+        expr: >
+          (
+            sum(rate(reprolab_http_requests_total{status=~"5.."}[1h]))
+            /
+            sum(rate(reprolab_http_requests_total[1h]))
+          ) > (14.4 * 0.005)
+        for: 2m
+        labels:
+          severity: critical
+          tier: p1
+        annotations:
+          summary: "Fast burn alert: ReproLab API error budget burning at 14.4x rate"
+          description: "Over 2% of the monthly error budget consumed within the last hour. Immediate engineer triage required."
+          runbook_url: "https://docs.reprolab.institute/runbooks/slo-fast-burn"
+
+      # P2 Slow Burn: 5% of 30-day budget consumed in 6 hours (3.0x burn rate)
+      - alert: ReproLabSLOSlowBurn
+        expr: >
+          (
+            sum(rate(reprolab_http_requests_total{status=~"5.."}[6h]))
+            /
+            sum(rate(reprolab_http_requests_total[6h]))
+          ) > (3.0 * 0.005)
+        for: 15m
+        labels:
+          severity: warning
+          tier: p2
+        annotations:
+          summary: "Slow burn alert: ReproLab API error budget burning at 3.0x rate"
+          description: "Over 5% of the monthly error budget consumed within 6 hours. Ticket created for team investigation."
+          runbook_url: "https://docs.reprolab.institute/runbooks/slo-slow-burn"
+
+      # Sandbox Queue Backlog Spike
+      - alert: SandboxQueueSpike
+        expr: reprolab_sandbox_active_containers > 20
+        for: 5m
+        labels:
+          severity: warning
+          tier: p2
+        annotations:
+          summary: "Sandbox execution queue spike (>20 active containers)"
+          description: "Container capacity saturated for more than 5 minutes. Consider scaling worker nodes."
+
+      # Cost Anomaly Alert
+      - alert: FinOpsCostAnomaly
+        expr: rate(reprolab_cost_spend_usd_total[1h]) * 24 > 50.0
+        for: 5m
+        labels:
+          severity: high
+          tier: p2
+        annotations:
+          summary: "Inference cost burn rate exceeds $50.00/day threshold"
+          description: "Accelerated LLM token consumption detected across active investigations."
+
+      # AST Static Security Block
+      - alert: ASTSecurityViolationAlert
+        expr: increase(reprolab_security_ast_violations_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          tier: p1
+        annotations:
+          summary: "Malicious code execution attempt intercepted by AST security pre-checker"
+          description: "AST pre-check blocked script attempting to import prohibited modules or call dangerous builtins."
+

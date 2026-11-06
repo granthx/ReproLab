@@ -1,0 +1,63 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "title": "ReproLab 06 - Business Outcomes & Research Value",
+  "tags": ["reprolab", "outcomes", "research"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Total Completed & Sealed Investigations",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(reprolab_cases_completed_total)",
+          "legendFormat": "Sealed Cases"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Estimated Researcher Hours Saved (32h / case)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(reprolab_cases_completed_total) * 32",
+          "legendFormat": "Hours Saved"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "h" } }
+    },
+    {
+      "id": 3,
+      "title": "Cases by Scientific Source Kind",
+      "type": "piechart",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (source_kind) (reprolab_cases_started_total)",
+          "legendFormat": "{{source_kind}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Case Completion Trajectory Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 6 },
+      "targets": [
+        {
+          "expr": "sum by (verdict) (increase(reprolab_cases_completed_total[1d]))",
+          "legendFormat": "Completed Cases: {{verdict}}"
+        }
+      ]
+    }
+  ]
+}

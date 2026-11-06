@@ -1,0 +1,104 @@
+# OpenTelemetry Collector Configuration for ReproLab (v1.42.0+)
+# Reference: docs/observability-plan.md §1 & playbook/04_TELEMETRY_MONITORING_COST_GUIDE.md §1-5
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+    spike_limit_mib: 128
+
+  batch:
+    send_batch_size: 256
+    timeout: 1s
+
+  # Redaction processor: scrubs PII and credentials prior to export
+  redaction:
+    allow_all_keys: false
+    allowed_keys:
+      - description
+      - name
+      - error.type
+      - error.message
+      - gen_ai.provider.name
+      - gen_ai.operation.name
+      - gen_ai.request.model
+      - gen_ai.response.model
+      - gen_ai.usage.input_tokens
+      - gen_ai.usage.output_tokens
+      - gen_ai.usage.cached_tokens
+      - app.reprolab.case_id
+      - app.reprolab.stage_node
+      - security.is_safe
+      - security.violations_count
+      - verification.verdict
+      - verification.rail_score
+    blocked_values:
+      # Email regex
+      - "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"
+      # Gemini API key (AIzaSy...)
+      - "AIzaSy[A-Za-z0-9_-]{33}"
+      # Bearer tokens
+      - "Bearer\\s+[A-Za-z0-9_.-]+"
+
+  # Tail sampling: 100% of errors/red-team alerts, 10% of routine health/status spans
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 10000
+    expected_new_traces_per_sec: 200
+    policies:
+      [
+        {
+          name: errors-policy,
+          type: status_code,
+          status_code: { status_codes: [ERROR] }
+        },
+        {
+          name: security-violations-policy,
+          type: numeric_attribute,
+          numeric_attribute: { key: security.violations_count, min_value: 1, max_value: 100 }
+        },
+        {
+          name: probabilistic-sample,
+          type: probabilistic,
+          probabilistic: { sampling_percentage: 10.0 }
+        }
+      ]
+
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    namespace: reprolab
+    send_timestamps: true
+
+  otlp/langfuse:
+    endpoint: http://langfuse:4317
+    tls:
+      insecure: true
+
+  file/audit:
+    path: /var/log/reprolab/otel_audit_traces.json
+    flush_interval: 5s
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, redaction, batch, tail_sampling]
+      exporters: [otlp/langfuse, file/audit]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [prometheus]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, redaction, batch]
+      exporters: [file/audit]
+

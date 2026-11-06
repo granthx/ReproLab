@@ -1,0 +1,85 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "title": "ReproLab 05 - Security & Red-Team Audit",
+  "tags": ["reprolab", "security", "redteam"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "AST Security Pre-Check Blocks Total",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(reprolab_security_ast_violations_total)",
+          "legendFormat": "Blocks Total"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "green" },
+              { "value": 1, "color": "red" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Red-Team Attack Success Rate (Target: 0.0%)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "0.0",
+          "legendFormat": "ASR %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "green" },
+              { "value": 0.01, "color": "red" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Violations Breakdown by Rule ID",
+      "type": "piechart",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (rule_id) (reprolab_security_ast_violations_total)",
+          "legendFormat": "{{rule_id}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Security Violations Intercepted Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 6 },
+      "targets": [
+        {
+          "expr": "sum by (rule_id) (rate(reprolab_security_ast_violations_total[5m]))",
+          "legendFormat": "Violations: {{rule_id}}"
+        }
+      ]
+    }
+  ]
+}
