@@ -149,9 +149,4 @@ ReproLab/
 ├── docker-compose.yml        # Multi-service container orchestration
 ├── pytest.ini                # Pytest configuration
 └── README.md                 # Single consolidated master documentation
-```
-npm --prefix frontend run audit:controls
 
-# Execute production rollback drill (< 90s SLA)
-backend\.venv\Scripts\python.exe scripts/rehearsed_production_rollback_drill.py
-```
