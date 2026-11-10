@@ -7,7 +7,7 @@ __pycache__/
 .venv/
 venv/
 .env
-storage/
+/storage/
 *.sqlite3
 node_modules/
 .next/

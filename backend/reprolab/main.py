@@ -124,6 +124,16 @@ def create_app(
     app.include_router(operations.router)
     app.include_router(auth.router)
 
+    @app.get("/", tags=["health"])
+    def root():
+        return {
+            "status": "online",
+            "service": "ReproLab API",
+            "version": "0.1.0",
+            "docs": "/docs",
+            "health": "/api/v1/health/live",
+        }
+
     from fastapi.responses import Response
     from reprolab.core.telemetry import generate_prometheus_metrics
 
