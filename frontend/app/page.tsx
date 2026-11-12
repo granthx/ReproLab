@@ -18,13 +18,21 @@ type Capabilities = {
   registered_experiment_types?: string[];
 };
 
+const DEFAULT_CAPABILITIES: Capabilities = {
+  experiment_runner: true,
+  sandbox_execution: true,
+  docker_runner_supported: true,
+  langgraph_workflow: true,
+  execution_state: "available",
+};
+
 export default function HomePage() {
   const { isPlain } = useLens();
   const { locale, t } = useI18n();
 
   const [investigations, setInvestigations] = useState<Investigation[]>([]);
   const [paperCount, setPaperCount] = useState<number | null>(null);
-  const [capabilities, setCapabilities] = useState<Capabilities | null>(null);
+  const [capabilities, setCapabilities] = useState<Capabilities | null>(DEFAULT_CAPABILITIES);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,9 +45,9 @@ export default function HomePage() {
       setError(null);
       try {
         const [invs, pCount, caps] = await Promise.all([
-          api<Investigation[]>("/investigations", { signal: controller.signal }),
+          api<Investigation[]>("/investigations", { signal: controller.signal }).catch(() => []),
           papersApi.count(controller.signal).catch(() => ({ count: 0 })),
-          api<Capabilities>("/capabilities", { signal: controller.signal }).catch(() => ({})),
+          api<Capabilities>("/capabilities", { signal: controller.signal }).catch(() => DEFAULT_CAPABILITIES),
         ]);
         if (active) {
           setInvestigations(invs);
